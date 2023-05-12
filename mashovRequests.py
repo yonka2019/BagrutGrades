@@ -2,7 +2,7 @@ import json
 import requests
 from colorama import Fore, Style
 
-import inital
+import web
 import configparser
 import re
 from tabulate import tabulate
@@ -19,8 +19,8 @@ def getAllBagrutData(years=None):
     :return: table of 'subject | year grade | bagrut grade | final grade' which can be printed
     """
     pattern = r"\s*\(.*\)"
-    url = inital.BASEURL + "bagrut/grades"
-    response = requests.request("GET", url, data=inital.payload(), headers=inital.getHeader('GET'))
+    url = web.BASEURL + "bagrut/grades"
+    response = requests.request("GET", url, data=web.payload(), headers=web.getHeader('GET'))
     bagrutGrades = json.loads(response.text)
     data = []
 
@@ -32,11 +32,11 @@ def getAllBagrutData(years=None):
 
                 modified_name = f"({grade['semel']})  " + re.sub(pattern, "", grade['name'])
 
-                shnaty = setGradeColor(str(grade.get('shnaty', "-")))
-                test = setGradeColor(str(grade.get('test', "-")))
-                final = setGradeColor(str(grade.get('final', "-")))
+                shnaty = _setGradeColor(str(grade.get('shnaty', "-")))
+                test = _setGradeColor(str(grade.get('test', "-")))
+                final = _setGradeColor(str(grade.get('final', "-")))
 
-                if gradeModifed_or_Added(modified_name, shnaty, test, final, last_data):
+                if _gradeModifed_or_Added(modified_name, shnaty, test, final, last_data):
                     modified_name = Fore.YELLOW + modified_name + Style.RESET_ALL
 
                 data.append([modified_name, shnaty, test, final])
@@ -46,11 +46,11 @@ def getAllBagrutData(years=None):
     return tabulate(data, headers=["שם", "מגן", "בגרות", "סופי"], tablefmt="pretty")
 
 
-def gradeModifed_or_Added(name, shnaty, test, final, prev_data):
+def _gradeModifed_or_Added(name, shnaty, test, final, prev_data):
     different = True
 
     for grade in prev_data:
-        if re.sub("\033\[[0-9;]*m", "", grade[0]) == name:  # compare the names without any colors comparing (it could be same name but newly added (colored yellow))
+        if re.  sub("\033\[[0-9;]*m", "", grade[0]) == name:  # compare the names without any colors comparing (it could be same name but newly added (colored yellow))
             if grade[1] == shnaty:  # compare the grades without removing the colors this is because if the colors are different - the grade also
                 if grade[2] == test:  # ""
                     if grade[3] == final:  # ""
@@ -60,7 +60,7 @@ def gradeModifed_or_Added(name, shnaty, test, final, prev_data):
     return different
 
 
-def setGradeColor(grade):
+def _setGradeColor(grade):
     LOW_GRADE = 65  # 0 - 65 LOW GRADE
     HIGH_GRADE = 90  # 90 - 100 +
 
