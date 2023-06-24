@@ -1,4 +1,4 @@
-# Bagrut Grade
+# Bagrut Grades 
 Shows bagrut grades in a table (through [Mashov API](https://github.com/micaelillos/MashovAPI))
 - high grades colored as green, low grade colored as red.
 - If exam data got updated (in compare with last run), he will colored as a yellow
