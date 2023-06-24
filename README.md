@@ -1,7 +1,15 @@
-# mashovBagrutGrades
-shows bagrut grades (via Mashov API)
+# Bagrut Grade
+Shows bagrut grades (through [Mashov API](https://github.com/micaelillos/MashovAPI))
 
-if exam data got updated (in compare of last run), he will colored as a yellow
+- If exam data got updated (in compare with last run), he will colored as a yellow
 
-## Preview
-![Screenshot](https://github.com/yonka2019/mashovBagrutGrades/blob/master/Screenshots/prev.png)
+## Usage Examples:
+```
+print(mashovRequests.get_all_bagrut_data())  # all years sorted
+
+print(mashovRequests.get_all_bagrut_data("2021, 2023"))  # 2021, 2023 grades sorted
+
+print(mashovRequests.get_all_bagrut_data(None, False))  # all years unsorted
+
+print(mashovRequests.get_all_bagrut_data("2021", True))  # 2021 sorted
+```
