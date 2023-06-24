@@ -1,11 +1,10 @@
 import json
 import requests
-from colorama import Fore, Style
-
 import web
 import configparser
 import re
 from tabulate import tabulate
+from colorama import Fore, Style
 
 config = configparser.ConfigParser()
 
