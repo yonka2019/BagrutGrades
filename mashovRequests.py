@@ -3,6 +3,7 @@ import requests
 import web
 import configparser
 import re
+import config as cfg
 from tabulate import tabulate
 from colorama import Fore, Style
 
@@ -18,6 +19,11 @@ def get_all_bagrut_data(years=None, sort=True):
     :param sort: sort grades by year of the exam (if multiple years selected - you can enable sorting option)
     :return: table of 'subject | year grade | bagrut grade | final grade' which can be printed
     """
+    if cfg.mashov["username"] == "" or cfg.mashov["password"] == "" or cfg.mashov["semel"] == "" or cfg.mashov["year"] == "":
+        print(Fore.RED + "\n[ERROR] Please fill up the config.py file!\n" + Style.RESET_ALL)
+        return
+
+    print("\n" + "[*] Username: " + cfg.mashov["username"] + "\n")
 
     if years is None:
         years_array = None
@@ -27,6 +33,13 @@ def get_all_bagrut_data(years=None, sort=True):
     pattern = r"\s*\(.*\)"
     url = web.BASEURL + "bagrut/grades"
     response = requests.request("GET", url, data=web.payload(), headers=web.get_header('GET'))
+
+    if response.text == "":
+        print(Fore.RED + "\n[ERROR] Wrong credentials in config.py file\n" + Style.RESET_ALL)
+        return
+    else:
+        print(Fore.GREEN + "[SUCCESS] Logged in\n" + Style.RESET_ALL)
+
     bagrut_grades = json.loads(response.text)
     data = []
 
@@ -36,7 +49,7 @@ def get_all_bagrut_data(years=None, sort=True):
         if ("shnaty" in grade) or ("test" in grade) or ("final" in grade):
             if years_array is None or str(grade["moed"])[0:4] in years_array:
 
-                modified_name = f"({grade['semel']})  " + re.sub(pattern, "", grade['name']) + Fore.MAGENTA + f"  [{str(grade['moed'])[0:4]}]" + Style.RESET_ALL
+                modified_name = f"({grade['semel']})  " + re.sub(pattern, "", grade['name']) + (" (ב)" if str(grade['moed'])[4:6] == "08" else "") +  Fore.MAGENTA + f"  [{str(grade['moed'])[0:4]}]" + Style.RESET_ALL
 
                 year_grade = _set_grade_color(str(grade.get('shnaty', "-")))
                 test_grade = _set_grade_color(str(grade.get('test', "-")))
@@ -70,18 +83,21 @@ def _grade_modified_or_added(name, shnaty, test, final, prev_data):
 
 
 def _set_grade_color(grade):
-    LOW_GRADE = 65  # 0 - 65 LOW GRADE
-    HIGH_GRADE = 90  # 90 - 100 +
+    FAIL_GRADE = (0, 55)  # 0 - 55
+    LOW_GRADE = (55, 65)  # 55 - 65
+    HIGH_GRADE = (90, 100)  # 90 - 100
 
-    if grade == '-':
+    if grade == '-':  # no grade
         grade = Fore.CYAN + grade + Style.RESET_ALL
     else:
-        if int(grade) <= LOW_GRADE:
+        if FAIL_GRADE[0] <= int(grade) <= FAIL_GRADE[1]:  # 0 - 55
             grade = Fore.RED + grade + Style.RESET_ALL
-        elif int(grade) >= HIGH_GRADE:
+        elif LOW_GRADE[0] <= int(grade) <= LOW_GRADE[1]:  # 55 - 65
+            grade = Fore.YELLOW + grade + Style.RESET_ALL
+        elif HIGH_GRADE[0] <= int(grade) <= HIGH_GRADE[1]:  # 90 - 10
             grade = Fore.GREEN + grade + Style.RESET_ALL
         else:
-            grade = Style.RESET_ALL + grade + Style.RESET_ALL
+            grade = Style.RESET_ALL + grade + Style.RESET_ALL  # not matches any color group
 
     return grade
 
